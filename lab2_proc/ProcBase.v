@@ -197,6 +197,12 @@ module lab2_proc_ProcBase
 
   logic        reg_en_X;
   logic [3:0]  alu_fn_X;
+  logic [1:0]  ex_result_sel_X;
+
+  logic        istream_val;
+  logic        ostream_val;
+  logic        istream_rdy;
+  logic        ostream_rdy;
 
   logic        reg_en_M;
   logic        wb_result_sel_M;

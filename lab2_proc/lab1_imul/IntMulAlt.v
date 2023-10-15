@@ -1,157 +1,15 @@
-//========================================================================
-// Integer Multiplier Variable-Latency Control Unit
-//========================================================================
+//=========================================================================
+// Integer Multiplier Variable-Latency Implementation
+//=========================================================================
 
-module lab1_imul_IntMulAltCtrl
-(
-  input  logic clk,
-  input  logic reset,
+`ifndef LAB1_IMUL_INT_MUL_ALT_V
+`define LAB1_IMUL_INT_MUL_ALT_V
 
-  // Dataflow signals
+`include "vc/trace.v"
 
-  input  logic istream_val,
-  output logic istream_rdy,
-
-  output logic ostream_val,
-  input  logic ostream_rdy,
-
-  // Control signals (ctrl -> dpath)
-
-  output logic a_mux_sel,
-  output logic b_mux_sel,
-  output logic result_mux_sel,
-  output logic result_reg_en,
-  output logic add_mux_sel,
-
-  // Status signals (dpath -> ctrl)
-
-  input  logic b_lsb,
-  input  logic is_b_zero
-);
-
-  //----------------------------------------------------------------------
-  // State
-  //----------------------------------------------------------------------
-
-  localparam STATE_IDLE = 2'd0;
-  localparam STATE_CALC = 2'd1;
-  localparam STATE_DONE = 2'd2;
-
-  /*
-  typedef enum logic [$clog2(3)-1:0] {
-    STATE_IDLE,
-    STATE_CALC,
-    STATE_DONE
-  } state_t;
-
-  state_t state_reg;
-  state_t state_next;
-  */
-
-  logic [1:0] state_reg;
-  logic [1:0] state_next;
-
-  always @( posedge clk ) begin
-    if ( reset )
-      state_reg <= STATE_IDLE;
-    else
-      state_reg <= state_next;
-  end
-
-  //----------------------------------------------------------------------
-  // State Transitions
-  //----------------------------------------------------------------------
-
-  logic istream_go, ostream_go, is_calc_done;
-
-  assign istream_go      = istream_val && istream_rdy;
-  assign ostream_go      = ostream_val && ostream_rdy;
-  assign is_calc_done = is_b_zero;
-
-  always @(*) begin
-
-    state_next = state_reg;
-
-    case ( state_reg )
-
-      STATE_IDLE: if ( istream_go      ) state_next = STATE_CALC;
-      STATE_CALC: if ( is_calc_done ) state_next = STATE_DONE;
-      STATE_DONE: if ( ostream_go      ) state_next = STATE_IDLE;
-      default:                        state_next = 'x;
-
-    endcase
-
-  end
-
-  //----------------------------------------------------------------------
-  // State Outputs
-  //----------------------------------------------------------------------
-
-  localparam a_x     = 1'dx;
-  localparam a_lsh   = 1'd0;
-  localparam a_ld    = 1'd1;
-
-  localparam b_x     = 1'dx;
-  localparam b_rsh   = 1'd0;
-  localparam b_ld    = 1'd1;
-
-  localparam res_x   = 1'dx;
-  localparam res_add = 1'd0;
-  localparam res_0   = 1'd1;
-
-  localparam add_x   = 1'dx;
-  localparam add_add = 1'd0;
-  localparam add_res = 1'd1;
-
-  task cs
-  (
-    input cs_istream_rdy,
-    input cs_ostream_val,
-    input cs_a_mux_sel,
-    input cs_b_mux_sel,
-    input cs_result_mux_sel,
-    input cs_result_reg_en,
-    input cs_add_mux_sel
-  );
-  begin
-    istream_rdy       = cs_istream_rdy;
-    ostream_val       = cs_ostream_val;
-    a_mux_sel      = cs_a_mux_sel;
-    b_mux_sel      = cs_b_mux_sel;
-    result_mux_sel = cs_result_mux_sel;
-    result_reg_en  = cs_result_reg_en;
-    add_mux_sel    = cs_add_mux_sel;
-  end
-  endtask
-
-  // Labels for Mealy transistions
-
-  logic do_sh_add, do_sh;
-
-  assign do_sh_add = (b_lsb == 1); // do shift and add
-  assign do_sh     = (b_lsb == 0); // do shift but no add
-
-  // Set outputs using a control signal "table"
-
-  always @(*) begin
-
-    case ( state_reg )
-
-//                               istream ostream a mux  b mux  res mux  res    add mux
-//                               rdy val  sel    sel    sel      en     sel
-STATE_IDLE:                  cs( 1,  0,   a_ld,  b_ld,  res_0,   1,     add_x    );
-STATE_CALC: if ( do_sh_add ) cs( 0,  0,   a_lsh, b_rsh, res_add, 1,     add_add  );
-       else if ( do_sh )     cs( 0,  0,   a_lsh, b_rsh, res_add, 1,     add_res  );
-STATE_DONE:                  cs( 0,  1,   a_x,   b_x,   res_x,   0,     add_x    );
-default:                     cs('x, 'x,   a_x,   b_x,   res_x,  'x,     add_x    );
-
-    endcase
-
-  end
-
-endmodule
-
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''/\
+// ''' LAB TASK ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+// Define datapath and control unit here.
+// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 //=========================================================================
 // Integer Multiplier Variable-Latency Implementation
@@ -174,44 +32,25 @@ module lab1_imul_IntMulAlt
   // ''' LAB TASK ''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   // Instantiate datapath and control models here and then connect them
   // together.
-  // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''\/
+  // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+	logic [1:0] state, new_state;
+	logic req_rdy, resp_val, in_val;
 
-  // Control signals
+	assign istream_rdy = req_rdy & (state == 0);
+	assign ostream_val = resp_val & (state == 2);
+	assign in_val = istream_rdy && istream_val;
 
-  logic a_mux_sel;
-  logic b_mux_sel;
-  logic result_mux_sel;
-  logic result_reg_en;
-  logic add_mux_sel;
+	multiplier2 multi(clk, reset, in_val, req_rdy, istream_msg, resp_val, ostream_rdy, ostream_msg);
+	
 
-  // Status signals
+	//State transition logic
+	assign new_state = (reset || state == 0 && !in_val || state == 2 && ostream_rdy) ? 0:
+					(state == 0 && in_val || !resp_val) ? 1 : 2; 
 
-  logic b_lsb;
-  logic is_b_zero;
-
-  logic [31:0] product;
-
-  // Instantiate and connect datapath
-
-  lab1_imul_IntMulAltDpath dpath
-  (
-    .istream_msg_a (istream_msg[63:32]),
-    .istream_msg_b (istream_msg[31: 0]),
-    .ostream_msg   (product),
-    .*
-  );
-
-  // Instantiate and connect control unit
-
-  lab1_imul_IntMulAltCtrl ctrl
-  (
-    .*
-  );
-
-  assign ostream_msg = product & {32{ostream_val}};
-
-  // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''/\
-
+	//Update fsm state
+	always @(posedge clk) begin
+		state <= new_state;
+	end
   //----------------------------------------------------------------------
   // Line Tracing
   //----------------------------------------------------------------------
@@ -230,43 +69,7 @@ module lab1_imul_IntMulAlt
     // ''' LAB TASK ''''''''''''''''''''''''''''''''''''''''''''''''''''''
     // Add additional line tracing using the helper tasks for
     // internal state including the current FSM state.
-    // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''\/
-
-    $sformat( str, "%x", dpath.a_reg_out );
-    vc_trace.append_str( trace_str, str );
-    vc_trace.append_str( trace_str, " " );
-
-    $sformat( str, "%x", dpath.b_reg_out );
-    vc_trace.append_str( trace_str, str );
-    vc_trace.append_str( trace_str, " " );
-
-    $sformat( str, "%x", dpath.result_reg_out );
-    vc_trace.append_str( trace_str, str );
-    vc_trace.append_str( trace_str, " " );
-
-    case ( ctrl.state_reg )
-      ctrl.STATE_IDLE:
-        vc_trace.append_str( trace_str, "I " );
-
-      ctrl.STATE_CALC:
-      begin
-        if ( ctrl.do_sh_add )
-          vc_trace.append_str( trace_str, "C+" );
-        else if ( ctrl.do_sh )
-          vc_trace.append_str( trace_str, "C " );
-        else
-          vc_trace.append_str( trace_str, "C?" );
-      end
-
-      ctrl.STATE_DONE:
-        vc_trace.append_str( trace_str, "D " );
-
-      default:
-        vc_trace.append_str( trace_str, "? " );
-
-    endcase
-
-    // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''/\
+    // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
     vc_trace.append_str( trace_str, ")" );
 
@@ -280,5 +83,110 @@ module lab1_imul_IntMulAlt
 
 endmodule
 
-`endif /* LAB1_IMUL_INT_MUL_ALT_V */
+//Jumps over streaks of 8 zeroes or less  in B at a time
 
+module multiplier2
+(
+  input  logic        clk,
+  input  logic        reset,
+
+  input  logic        istream_val,
+  output logic        istream_rdy,
+  input  logic [63:0] istream_msg,
+
+  output logic        ostream_val,
+  input  logic        ostream_rdy,
+  output logic [31:0] ostream_msg
+);
+	logic [31:0] req_msg_a, req_msg_b;
+	assign {req_msg_a, req_msg_b} = istream_msg;
+	
+	logic [5:0] counter;
+	logic [31:0] a_reg, b_reg, a_new, b_new, msg_new;
+	
+
+	left_shifter ls_block(istream_rdy ? req_msg_a : a_reg, jump(istream_rdy ? req_msg_b[7:1] : b_reg[7:1]),  a_new);
+	right_shifter rs_block(istream_rdy ? req_msg_b : b_reg, jump(istream_rdy ? req_msg_b[7:1] : b_reg[7:1]), b_new);
+	adder add_mul_block(istream_rdy ? req_msg_a : a_reg, ostream_msg, msg_new);
+
+	always @(posedge clk) begin
+		if (reset) 
+			begin
+				a_reg <= 32'b0;
+				b_reg <= 32'b0;
+				counter <= 0;
+				istream_rdy <= 1;
+				ostream_msg <= 0;
+				ostream_val <= 0;
+			end
+		else if (istream_val) //Calc
+			begin
+				a_reg <= a_new; 
+				b_reg <= b_new;
+				counter <= {2'b0, jump(req_msg_b[7:1])};
+				istream_rdy <= 0;
+				ostream_val <= 0;
+				ostream_msg <= req_msg_b[0] ? req_msg_a : 0;
+			end
+		else if (!istream_rdy && counter < 32)  //Calc after valid request
+			begin
+				ostream_msg <= b_reg[0] ? msg_new : ostream_msg;
+				counter <= counter + {2'b0, jump(b_reg[7:1])};
+				a_reg <= a_new;
+				b_reg <= b_new;
+			end
+		else //Done or Idle
+			begin
+				ostream_val <= 1;
+				istream_rdy <= 1;
+			end		
+	end
+	
+	
+	function [3:0] jump 
+	(input [6:0] b);
+		casez (b)
+			7'b0000000: jump = 4'd8;
+			7'b1000000: jump = 4'd7;
+			7'b?100000: jump = 4'd6;
+			7'b??10000: jump = 4'd5;
+			7'b???1000: jump = 4'd4;
+			7'b????100: jump = 4'd3;
+			7'b?????10: jump = 4'd2;
+			default: jump = 4'd1;
+		endcase
+	endfunction
+endmodule
+
+module adder
+(
+	input [31:0] a,
+	input [31:0] b,
+	output [31:0] sum
+);
+
+assign sum = a + b;
+
+endmodule
+
+module left_shifter
+(
+	input [31:0] a,
+	input [3:0] shamt,
+	output [31:0] result
+);
+
+assign result = a << shamt;
+
+endmodule
+
+module right_shifter
+(
+	input [31:0] a,
+	input [3:0] shamt,
+	output [31:0] result
+);
+
+assign result = a >> shamt;
+endmodule
+`endif /* LAB1_IMUL_INT_MUL_ALT_V */

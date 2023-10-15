@@ -55,6 +55,12 @@ module lab2_proc_ProcBaseDpath
   input  logic [3:0]   alu_fn_X,
   input  logic [1:0]   ex_result_sel_X,
 
+  //Imul control signals
+  input  logic         istream_val,
+  input  logic         ostream_rdy,
+  output  logic        istream_rdy,
+  output  logic        ostream_val,
+
   input  logic         reg_en_M,
   input  logic         wb_result_sel_M,
 
@@ -71,15 +77,12 @@ module lab2_proc_ProcBaseDpath
   // extra ports
 
   input  logic [31:0]  core_id,
-  output logic         stats_en,
-  
-  //Imul control signals
-  input  logic         istream_val,
-  input  logic         ostream_rdy,
-  output  logic        istream_rdy,
-  output  logic      ostream_val
-  
+  output logic         stats_en
 );
+
+  //Imul ports
+  //assign istream_rdy = 1'b0;
+  //assign ostream_val = 1'b0;
 
   localparam c_reset_vector = 32'h200;
   localparam c_reset_inst   = 32'h00000000;
@@ -190,7 +193,6 @@ module lab2_proc_ProcBaseDpath
   logic [31:0] op2_D;
 
   assign op1_D = rf_rdata0_D;
-
   logic [31:0] csrr_data_D;
 
   logic [31:0] num_cores;
@@ -226,6 +228,32 @@ module lab2_proc_ProcBaseDpath
     .out  (jal_target_D),
     .cout ()
   );
+
+  logic [63:0] istream_msg;
+  logic [31:0] ostream_msg;
+
+  assign istream_msg = {op1_D, op2_D};
+
+  lab1_imul_IntMulAlt imul
+  (
+      .clk(clk),
+      .reset(reset),
+      .istream_val(istream_val),
+      .istream_rdy(istream_rdy),
+      .istream_msg(istream_msg),
+      .ostream_val(ostream_val),
+      .ostream_rdy(ostream_rdy),
+      .ostream_msg(ostream_msg)
+  );
+
+  vc_Mux3#(32) ex_result_sel_mux_X
+  (
+    .in0  (ostream_msg),
+    .in1  (alu_result_X),
+    .in2  (),
+    .sel  (ex_result_sel_X),
+    .out  (ex_result_X)
+  ); 
 
   //--------------------------------------------------------------------
   // X stage
@@ -273,35 +301,6 @@ module lab2_proc_ProcBaseDpath
     .ops_eq   (br_cond_eq_X),
     .ops_lt   (),
     .ops_ltu  ()
-  );
-
-  //istream_rdy Datapath
-  //ostream_val Datapath
-  //ostream_rdy Control
-  //logic [63:0] istream_msg;
-  logic [31:0] ostream_msg;
-
-  assign istream_msg = {op1_D, op2_D};
-
-  lab1_imul_IntMulAlt imul
-  (
-      .clk(clk),
-      .reset(reset),
-      .istream_val(istream_val),
-      .istream_rdy(istream_rdy),
-      .istream_msg(istream_msg),
-      .ostream_val(ostream_val),
-      .ostream_rdy(ostream_rdy),
-      .ostream_msg(ostream_msg)
-  );
-
-  vc_Mux3#(32) ex_result_sel_mux_X
-  (
-    .in0  (ostream_msg),
-    .in1  (alu_result_X),
-    .in2  (),
-    .sel  (ex_result_sel_X),
-    .out  (ex_result_X)
   );
 
   //assign ex_result_X = alu_result_X;

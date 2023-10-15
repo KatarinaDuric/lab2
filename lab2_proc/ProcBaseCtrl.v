@@ -50,6 +50,12 @@ module lab2_proc_ProcBaseCtrl
   output logic [3:0]  alu_fn_X,
   output  logic [1:0] ex_result_sel_X,
 
+//Imul signals
+  output logic       istream_val,
+  output logic       ostream_rdy,
+  input logic        istream_rdy,
+  input logic        ostream_val,
+
   output logic        reg_en_M,
   output logic        wb_result_sel_M,
 
@@ -65,13 +71,7 @@ module lab2_proc_ProcBaseCtrl
 
   // extra ports
 
-  output logic        commit_inst,
-
-  //Imul signals
-  output logic       istream_val,
-  output logic       ostream_rdy,
-  input logic        istream_rdy,
-  input logic        ostream_val
+  output logic        commit_inst
 );
 
   //----------------------------------------------------------------------
@@ -142,6 +142,12 @@ module lab2_proc_ProcBaseCtrl
 
   logic squash_F;
   logic squash_D;
+
+  //Imul ports
+  //assign ex_result_sel_X = 2'd0;
+  //assign istream_val = 1'b0;
+  //assign ostream_rdy = 1'b0;
+
 
   //----------------------------------------------------------------------
   // F stage
@@ -357,13 +363,13 @@ module lab2_proc_ProcBaseCtrl
 
       // Reg-Reg Arithmetic instructions
       `TINYRV2_INST_SUB   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sub, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_MUL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_MUL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_AND   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_and, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_OR   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_or, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_XOR   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_xor, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_SLT   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_slt, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_SLTU   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sltu, nr, wm_a, y,  n,   n    );
-      `TINYRV2_INST_SRA   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sra, nr, wm_a, y,  n,   n    );
+      //`TINYRV2_INST_SRA   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sra, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_SRL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_srl, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_SLL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sll, nr, wm_a, y,  n,   n    );
   
@@ -374,7 +380,7 @@ module lab2_proc_ProcBaseCtrl
       `TINYRV2_INST_XORI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_xor, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_SLTI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_slt, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_SLTIU   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sltu, nr, wm_a, y,  n,   n    );
-      `TINYRV2_INST_SRAI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sra, nr, wm_a, y,  n,   n    );
+      //`TINYRV2_INST_SRAI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sra, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_SRLI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_srl, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_SLLI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sll, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_LUI   :cs( y, br_na,  imm_u, y, bm_imm,  n, alu_lui, nr, wm_a, y,  n,   n    );
@@ -393,7 +399,6 @@ module lab2_proc_ProcBaseCtrl
       //`TINYRV2_INST_BLTU   :cs( y, br_na,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_BGE   :cs( y, br_na,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_BGEU   :cs( y, br_na,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
-
       default              :cs( n, br_x,  imm_x, n, bm_x,    n, alu_x,   nr, wm_x, n,  n,   n    );
 
     endcase
@@ -479,8 +484,8 @@ module lab2_proc_ProcBaseCtrl
       ostall_waddr_X_rs2_D || ostall_waddr_M_rs2_D || ostall_waddr_W_rs2_D;
 
   // Final ostall signal
-
   assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D || !istream_rdy);
+  //assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D );
 
   // osquash due to jump instruction in D stage (not implemented yet)
 
@@ -497,7 +502,14 @@ module lab2_proc_ProcBaseCtrl
   assign next_val_D = val_D && !stall_D && !squash_D;
 
   //Imul control signals (D stage)
-  assign istream_val = !stall_D && (inst_D == `TINYRV2_INST_MUL);
+  //assign istream_val = !stall_D && (inst_D == `TINYRV2_INST_MUL);
+
+  always_comb begin
+    casez(inst_D)
+      `TINYRV2_INST_MUL: istream_val = !stall_D;
+      default: istream_val = 0;
+    endcase
+  end
   //----------------------------------------------------------------------
   // X stage
   //----------------------------------------------------------------------
@@ -548,8 +560,15 @@ module lab2_proc_ProcBaseCtrl
   end
 
   // ostall due to dmem_reqstream not ready.
-
-  assign ostall_X = val_X && ( dmem_reqstream_type_X != nr || (!ostream_val && (inst_X == `TINYRV2_INST_MUL))) && !dmem_reqstream_rdy;
+  always_comb begin
+    casez(inst_X)
+      `TINYRV2_INST_MUL: ostall_X =  !ostream_val;
+       default: ostall_X = val_X && ( dmem_reqstream_type_X != nr ) && !dmem_reqstream_rdy;
+    endcase
+  end
+  //assign ostall_X = val_X && ( dmem_reqstream_type_X != nr ||
+      //(!ostream_val && (inst_X == `TINYRV2_INST_MUL))) && !dmem_reqstream_rdy;
+  //assign ostall_X = val_X && ( dmem_reqstream_type_X != nr ) && !dmem_reqstream_rdy;
 
   // osquash due to taken branch, notice we can't osquash if current
   // stage stalls, otherwise we will send osquash twice.
@@ -570,20 +589,21 @@ module lab2_proc_ProcBaseCtrl
   assign next_val_X = val_X && !stall_X;
 
   //Imul control signals (X Stage)
-  assign ostream_rdy = !stallX && (inst_X == `TINYRV2_INST_MUL);
+  //assign ostream_rdy = !stall_X && (inst_X == `TINYRV2_INST_MUL);
 
+  always_comb begin
+    casez(inst_X)
+      `TINYRV2_INST_MUL: ostream_rdy = !stall_X;
+       default: ostream_rdy = 0;
+    endcase
+  end
   //Execute result select logic
   always_comb begin
-    if (inst_X == `TINYRV2_INST_MUL) 
-      begin
-        ex_result_sel_X = 2'd0;
-      end
-    else 
-      begin
-        ex_result_sel_X = 2'd1;
-      end
+    casez(inst_X)
+      `TINYRV2_INST_MUL: ex_result_sel_X = 2'd0;
+       default: ex_result_sel_X = 2'd1;
+    endcase
   end
-  //
   //----------------------------------------------------------------------
   // M stage
   //----------------------------------------------------------------------
