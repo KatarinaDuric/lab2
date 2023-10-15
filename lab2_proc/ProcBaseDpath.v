@@ -14,6 +14,7 @@
 `include "tinyrv2_encoding.v"
 `include "ProcDpathImmGen.v"
 `include "ProcDpathAlu.v"
+`include "lab1_imul/IntMulAlt.v"
 
 module lab2_proc_ProcBaseDpath
 #(
@@ -52,6 +53,7 @@ module lab2_proc_ProcBaseDpath
 
   input  logic         reg_en_X,
   input  logic [3:0]   alu_fn_X,
+  input  logic [1:0]   ex_result_sel_X,
 
   input  logic         reg_en_M,
   input  logic         wb_result_sel_M,
@@ -69,7 +71,14 @@ module lab2_proc_ProcBaseDpath
   // extra ports
 
   input  logic [31:0]  core_id,
-  output logic         stats_en
+  output logic         stats_en,
+  
+  //Imul control signals
+  input  logic         istream_val,
+  input  logic         ostream_rdy,
+  output  logic        istream_rdy,
+  output  logic      ostream_val
+  
 );
 
   localparam c_reset_vector = 32'h200;
@@ -177,7 +186,10 @@ module lab2_proc_ProcBaseDpath
     .wr_data  (rf_wdata_W)
   );
 
+  logic [31:0] op1_D;
   logic [31:0] op2_D;
+
+  assign op1_D = rf_rdata0_D;
 
   logic [31:0] csrr_data_D;
 
@@ -227,7 +239,7 @@ module lab2_proc_ProcBaseDpath
     .clk   (clk),
     .reset (reset),
     .en    (reg_en_X),
-    .d     (rf_rdata0_D),
+    .d     (op1_D),
     .q     (op1_X)
   );
 
@@ -263,7 +275,36 @@ module lab2_proc_ProcBaseDpath
     .ops_ltu  ()
   );
 
-  assign ex_result_X = alu_result_X;
+  //istream_rdy Datapath
+  //ostream_val Datapath
+  //ostream_rdy Control
+  //logic [63:0] istream_msg;
+  logic [31:0] ostream_msg;
+
+  assign istream_msg = {op1_D, op2_D};
+
+  lab1_imul_IntMulAlt imul
+  (
+      .clk(clk),
+      .reset(reset),
+      .istream_val(istream_val),
+      .istream_rdy(istream_rdy),
+      .istream_msg(istream_msg),
+      .ostream_val(ostream_val),
+      .ostream_rdy(ostream_rdy),
+      .ostream_msg(ostream_msg)
+  );
+
+  vc_Mux3#(32) ex_result_sel_mux_X
+  (
+    .in0  (ostream_msg),
+    .in1  (alu_result_X),
+    .in2  (),
+    .sel  (ex_result_sel_X),
+    .out  (ex_result_X)
+  );
+
+  //assign ex_result_X = alu_result_X;
 
   assign dmem_reqstream_msg_addr = alu_result_X;
 

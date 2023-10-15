@@ -48,6 +48,7 @@ module lab2_proc_ProcBaseCtrl
 
   output logic        reg_en_X,
   output logic [3:0]  alu_fn_X,
+  output  logic [1:0] ex_result_sel_X,
 
   output logic        reg_en_M,
   output logic        wb_result_sel_M,
@@ -64,7 +65,13 @@ module lab2_proc_ProcBaseCtrl
 
   // extra ports
 
-  output logic        commit_inst
+  output logic        commit_inst,
+
+  //Imul signals
+  output logic       istream_val,
+  output logic       ostream_rdy,
+  input logic        istream_rdy,
+  input logic        ostream_val
 );
 
   //----------------------------------------------------------------------
@@ -261,6 +268,8 @@ module lab2_proc_ProcBaseCtrl
   localparam alu_xor  = 4'd2;
   localparam alu_and  = 4'd3;
   localparam alu_or   = 4'd4;
+  localparam alu_srl  = 4'd5;
+  localparam alu_sll  = 4'd6;
   localparam alu_cp0  = 4'd11;
   localparam alu_cp1  = 4'd12;
 
@@ -346,10 +355,6 @@ module lab2_proc_ProcBaseCtrl
       `TINYRV2_INST_CSRR    :cs( y, br_na,  imm_i, n, bm_csr, n, alu_cp1, nr, wm_a, y,  y,   n    );
       `TINYRV2_INST_CSRW    :cs( y, br_na,  imm_i, y, bm_rf,  n, alu_cp0, nr, wm_a, n,  n,   y    );
 
-      //''' LAB TASK '''''''''''''''''''''''''''''''''''''''''''''''''''''
-      // Add more instructions to the control signal table
-      //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
       // Reg-Reg Arithmetic instructions
       `TINYRV2_INST_SUB   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sub, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_MUL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
@@ -358,9 +363,9 @@ module lab2_proc_ProcBaseCtrl
       `TINYRV2_INST_XOR   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_xor, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_SLT   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_slt, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_SLTU   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sltu, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SRA   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sra, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SRL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_srl, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SLL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sll, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SRA   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sra, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SRL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_srl, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SLL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sll, nr, wm_a, y,  n,   n    );
   
       //Reg-Imm Arithmetic Instructions
       `TINYRV2_INST_ADDI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_add, nr, wm_a, y,  n,   n    );
@@ -369,9 +374,9 @@ module lab2_proc_ProcBaseCtrl
       `TINYRV2_INST_XORI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_xor, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_SLTI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_slt, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_SLTIU   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sltu, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SRAI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_srai, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SRLI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_srli, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SLLI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_slui, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SRAI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sra, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SRLI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_srl, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SLLI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sll, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_LUI   :cs( y, br_na,  imm_u, y, bm_imm,  n, alu_lui, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_AUIPC   :cs( y, br_na,  imm_u, y, bm_imm,  n, alu_x, nr, wm_a, y,  n,   n    );
 
@@ -475,7 +480,7 @@ module lab2_proc_ProcBaseCtrl
 
   // Final ostall signal
 
-  assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D );
+  assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D || !istream_rdy);
 
   // osquash due to jump instruction in D stage (not implemented yet)
 
@@ -491,6 +496,8 @@ module lab2_proc_ProcBaseCtrl
   logic  next_val_D;
   assign next_val_D = val_D && !stall_D && !squash_D;
 
+  //Imul control signals (D stage)
+  assign istream_val = !stall_D && (inst_D == `TINYRV2_INST_MUL);
   //----------------------------------------------------------------------
   // X stage
   //----------------------------------------------------------------------
@@ -542,7 +549,7 @@ module lab2_proc_ProcBaseCtrl
 
   // ostall due to dmem_reqstream not ready.
 
-  assign ostall_X = val_X && ( dmem_reqstream_type_X != nr ) && !dmem_reqstream_rdy;
+  assign ostall_X = val_X && ( dmem_reqstream_type_X != nr || (!ostream_val && (inst_X == `TINYRV2_INST_MUL))) && !dmem_reqstream_rdy;
 
   // osquash due to taken branch, notice we can't osquash if current
   // stage stalls, otherwise we will send osquash twice.
@@ -562,6 +569,21 @@ module lab2_proc_ProcBaseCtrl
   logic  next_val_X;
   assign next_val_X = val_X && !stall_X;
 
+  //Imul control signals (X Stage)
+  assign ostream_rdy = !stallX && (inst_X == `TINYRV2_INST_MUL);
+
+  //Execute result select logic
+  always_comb begin
+    if (inst_X == `TINYRV2_INST_MUL) 
+      begin
+        ex_result_sel_X = 2'd0;
+      end
+    else 
+      begin
+        ex_result_sel_X = 2'd1;
+      end
+  end
+  //
   //----------------------------------------------------------------------
   // M stage
   //----------------------------------------------------------------------
