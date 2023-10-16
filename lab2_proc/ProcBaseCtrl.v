@@ -167,8 +167,9 @@ module lab2_proc_ProcBaseCtrl
   end
 
   // forward declaration for PC sel
-
+  logic       pc_redirect_D;
   logic       pc_redirect_X;
+  logic [1:0] pc_sel_D;
   logic [1:0] pc_sel_X;
 
   // PC select logic
@@ -176,6 +177,8 @@ module lab2_proc_ProcBaseCtrl
   always_comb begin
     if ( pc_redirect_X )   // If a branch is taken in X stage
       pc_sel_F = pc_sel_X; // Use pc from X
+    else if ( pc_redirect_D ) 
+      pc_sel_F = pc_sel_D;
     else
       pc_sel_F = 2'b0;     // Use pc+4
   end
@@ -209,6 +212,20 @@ module lab2_proc_ProcBaseCtrl
   //----------------------------------------------------------------------
   // D stage
   //----------------------------------------------------------------------
+
+  // PC redirect logic (D Stage)
+  always_comb begin
+    casez(inst_D)
+      `TINYRV2_INST_JAL: begin 
+          pc_redirect_D = 1'b1; //always redirect
+          pc_sel_D = 2'd2; //use jal target if valid
+      end
+      default: begin
+          pc_redirect_D = 1'b0;
+          pc_sel_D = 2'd0; //use pc+4
+      end
+    endcase
+  end
 
   // Register enable logic
 
@@ -390,8 +407,8 @@ module lab2_proc_ProcBaseCtrl
       //`TINYRV2_INST_SW   :cs( y, br_na,  imm_s, y, bm_imm,  n, alu_add, st, wm_x, n,  n,   n    );
 
       //Jump Instructions
-      //`TINYRV2_INST_JAL   :cs( y, br_na,  imm_j, n, bm_imm,  n, alu_add, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_JALR   :cs( y, br_na,  imm_i, y, bm_imm,  y, alu_add, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_JAL   :cs( y, br_na,  imm_j, n, bm_x,  n, alu_x, nr, wm_a, y,  n,   n    );
+      //`TINYRV2_INST_JALR   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_add, nr, wm_a, y,  n,   n    );
 
       //Branch Instructions
       //`TINYRV2_INST_BEQ   :cs( y, br_na,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
@@ -489,7 +506,14 @@ module lab2_proc_ProcBaseCtrl
 
   // osquash due to jump instruction in D stage (not implemented yet)
 
-  assign osquash_D = 1'b0;
+  //assign osquash_D = 1'b0;
+
+  always_comb begin
+    casez(inst_D)
+      `TINYRV2_INST_JAL: osquash_D = 1'b1;
+      default: osquash_D = 1'b0;
+    endcase
+  end
 
   // stall and squash in D
 
@@ -601,7 +625,9 @@ module lab2_proc_ProcBaseCtrl
   always_comb begin
     casez(inst_X)
       `TINYRV2_INST_MUL: ex_result_sel_X = 2'd0;
-       default: ex_result_sel_X = 2'd1;
+      `TINYRV2_INST_JAL: ex_result_sel_X = 2'd1;
+      `TINYRV2_INST_JALR: ex_result_sel_X = 2'd1;
+       default: ex_result_sel_X = 2'd2;
     endcase
   end
   //----------------------------------------------------------------------

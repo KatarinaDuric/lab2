@@ -116,11 +116,12 @@ module lab2_proc_ProcBaseDpath
     .out  (pc_plus4_F)
   );
 
-  vc_Mux3#(32) pc_sel_mux_F
+  vc_Mux4#(32) pc_sel_mux_F
   (
     .in0  (pc_plus4_F),
     .in1  (br_target_X),
     .in2  (jal_target_D),
+    .in3  (),
     .sel  (pc_sel_F),
     .out  (pc_next_F)
   );
@@ -249,8 +250,8 @@ module lab2_proc_ProcBaseDpath
   vc_Mux3#(32) ex_result_sel_mux_X
   (
     .in0  (ostream_msg),
-    .in1  (alu_result_X),
-    .in2  (),
+    .in1  (pc_plus4_X),
+    .in2  (alu_result_X),
     .sel  (ex_result_sel_X),
     .out  (ex_result_X)
   ); 
@@ -261,6 +262,16 @@ module lab2_proc_ProcBaseDpath
 
   logic [31:0] op1_X;
   logic [31:0] op2_X;
+  logic [31:0] pc_X;
+
+   vc_EnResetReg#(32) pc_reg_X
+  (
+    .clk    (clk),
+    .reset  (reset),
+    .en     (reg_en_X),
+    .d      (pc_D),
+    .q      (pc_X)
+  );
 
   vc_EnResetReg#(32, 0) op1_reg_X
   (
@@ -291,6 +302,13 @@ module lab2_proc_ProcBaseDpath
 
   logic [31:0] alu_result_X;
   logic [31:0] ex_result_X;
+  logic [31:0] pc_plus4_X;
+
+   vc_Incrementer#(32, 4) pc_incr_X
+  (
+    .in   (pc_X),
+    .out  (pc_plus4_X)
+  );
 
   lab2_proc_ProcDpathAlu alu
   (

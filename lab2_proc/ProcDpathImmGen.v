@@ -16,7 +16,7 @@ module lab2_proc_ProcDpathImmGen
   always_comb begin
     case ( imm_type )
       3'd0: // I-type
-        imm = { {21{inst[31]}}, inst[30:25], inst[24:21], inst[20] };
+        imm = { {21{inst[31]}}, inst[30:20] };
 
       3'd1: // S-type
         imm = {{21{inst[31]}}, inst[30:25], inst[11:8], inst[7]};
