@@ -106,7 +106,7 @@ module lab2_proc_ProcBaseDpath
   logic [31:0] jal_target_D;
   logic [31:0] jalr_target_X;
 
-  assign jalr_target_X = alu_result_X & (32'hfffffffe);
+  assign jalr_target_X = alu_result_X;
 
   vc_EnResetReg#(32, c_reset_vector - 32'd4) pc_reg_F
   (

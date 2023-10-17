@@ -309,6 +309,10 @@ end
   localparam alu_or   = 4'd4;
   localparam alu_srl  = 4'd5;
   localparam alu_sll  = 4'd6;
+  localparam alu_add2 = 4'd7;
+  localparam alu_slt  = 4'd8;
+  localparam alu_sltu = 4'd9;
+  localparam alu_sra  = 4'd10;
   localparam alu_cp0  = 4'd11;
   localparam alu_cp1  = 4'd12;
 
@@ -400,9 +404,9 @@ end
       `TINYRV2_INST_AND   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_and, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_OR   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_or, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_XOR   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_xor, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SLT   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_slt, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SLTU   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sltu, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SRA   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sra, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SLT   :cs( y, br_na,  imm_x, y, bm_rf,  n, alu_slt, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SLTU   :cs( y, br_na,  imm_x, y, bm_rf,  n, alu_sltu, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SRA   :cs( y, br_na,  imm_x, y, bm_rf,  n, alu_sra, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_SRL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_srl, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_SLL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sll, nr, wm_a, y,  n,   n    );
   
@@ -411,16 +415,16 @@ end
       `TINYRV2_INST_ORI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_or, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_ANDI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_and, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_XORI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_xor, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SLTI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_slt, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SLTIU   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sltu, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_SRAI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sra, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SLTI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_slt, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SLTIU   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sltu, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SRAI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sra, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_SRLI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_srl, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_SLLI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sll, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_LUI   :cs( y, br_na,  imm_u, n, bm_imm,  n, alu_cp1, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_AUIPC   :cs( y, br_na,  imm_u, n, bm_imm,  n, alu_add, nr, wm_a, y,  n,   n    );
 
       //Memory Instructions
-      `TINYRV2_INST_SW   :cs( y, br_na,  imm_s, y, bm_imm,  y, alu_add, st, wm_x, n,  n,   n    );
+      `TINYRV2_INST_SW   :cs( y, br_na,  imm_s, y, bm_imm,  y, alu_add2, st, wm_x, n,  n,   n    );
 
       //Jump Instructions
       `TINYRV2_INST_JAL   :cs( y, br_na,  imm_j, n, bm_x,  n, alu_x, nr, wm_a, y,  n,   n    );

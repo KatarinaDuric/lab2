@@ -13,7 +13,6 @@ VL_ATTR_COLD void Vtop___024root___ctor_var_reset_1(Vtop___024root* vlSelf) {
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___ctor_var_reset_1\n"); );
     // Body
-    vlSelf->__Vdlyvval__top__DOT__mem__DOT__mem__DOT__m__v19040 = VL_RAND_RESET_I(32);
     vlSelf->__Vdlyvval__top__DOT__mem__DOT__mem__DOT__m__v19041 = VL_RAND_RESET_I(32);
     vlSelf->__Vdlyvval__top__DOT__mem__DOT__mem__DOT__m__v19042 = VL_RAND_RESET_I(32);
     vlSelf->__Vdlyvval__top__DOT__mem__DOT__mem__DOT__m__v19043 = VL_RAND_RESET_I(32);
