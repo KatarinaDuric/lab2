@@ -51,10 +51,10 @@ module lab2_proc_ProcBaseCtrl
   output  logic [1:0] ex_result_sel_X,
 
 //Imul signals
-  output logic       istream_val,
-  output logic       ostream_rdy,
-  input logic        istream_rdy,
-  input logic        ostream_val,
+  output logic       imul_req_val_D,
+  output logic       imul_resp_rdy_X,
+  input logic        imul_req_rdy_D,
+  input logic        imul_resp_val_X,
 
   output logic        reg_en_M,
   output logic        wb_result_sel_M,
@@ -145,8 +145,8 @@ module lab2_proc_ProcBaseCtrl
 
   //Imul ports
   //assign ex_result_sel_X = 2'd0;
-  //assign istream_val = 1'b0;
-  //assign ostream_rdy = 1'b0;
+  //assign imul_req_val_D = 1'b0;
+  //assign imul_resp_rdy_X = 1'b0;
 
 
   //----------------------------------------------------------------------
@@ -226,7 +226,6 @@ module lab2_proc_ProcBaseCtrl
       end
     endcase
   end
-
   // Register enable logic
 
   assign reg_en_D = !stall_D || squash_D;
@@ -501,7 +500,7 @@ module lab2_proc_ProcBaseCtrl
       ostall_waddr_X_rs2_D || ostall_waddr_M_rs2_D || ostall_waddr_W_rs2_D;
 
   // Final ostall signal
-  assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D || !istream_rdy);
+  assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D || !imul_req_rdy_D);
   //assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D );
 
   // osquash due to jump instruction in D stage (not implemented yet)
@@ -526,12 +525,12 @@ module lab2_proc_ProcBaseCtrl
   assign next_val_D = val_D && !stall_D && !squash_D;
 
   //Imul control signals (D stage)
-  //assign istream_val = !stall_D && (inst_D == `TINYRV2_INST_MUL);
+  //assign imul_req_val_D = !stall_D && (inst_D == `TINYRV2_INST_MUL);
 
   always_comb begin
     casez(inst_D)
-      `TINYRV2_INST_MUL: istream_val = !stall_D;
-      default: istream_val = 0;
+      `TINYRV2_INST_MUL: imul_req_val_D = !stall_D;
+      default: imul_req_val_D = 0;
     endcase
   end
   //----------------------------------------------------------------------
@@ -586,12 +585,12 @@ module lab2_proc_ProcBaseCtrl
   // ostall due to dmem_reqstream not ready.
   always_comb begin
     casez(inst_X)
-      `TINYRV2_INST_MUL: ostall_X =  !ostream_val;
+      `TINYRV2_INST_MUL: ostall_X =  !imul_resp_val_X;
        default: ostall_X = val_X && ( dmem_reqstream_type_X != nr ) && !dmem_reqstream_rdy;
     endcase
   end
   //assign ostall_X = val_X && ( dmem_reqstream_type_X != nr ||
-      //(!ostream_val && (inst_X == `TINYRV2_INST_MUL))) && !dmem_reqstream_rdy;
+      //(!imul_resp_val_X && (inst_X == `TINYRV2_INST_MUL))) && !dmem_reqstream_rdy;
   //assign ostall_X = val_X && ( dmem_reqstream_type_X != nr ) && !dmem_reqstream_rdy;
 
   // osquash due to taken branch, notice we can't osquash if current
@@ -613,12 +612,12 @@ module lab2_proc_ProcBaseCtrl
   assign next_val_X = val_X && !stall_X;
 
   //Imul control signals (X Stage)
-  //assign ostream_rdy = !stall_X && (inst_X == `TINYRV2_INST_MUL);
+  //assign imul_resp_rdy_X = !stall_X && (inst_X == `TINYRV2_INST_MUL);
 
   always_comb begin
     casez(inst_X)
-      `TINYRV2_INST_MUL: ostream_rdy = !stall_X;
-       default: ostream_rdy = 0;
+      `TINYRV2_INST_MUL: imul_resp_rdy_X = !stall_X;
+       default: imul_resp_rdy_X = 0;
     endcase
   end
   //Execute result select logic

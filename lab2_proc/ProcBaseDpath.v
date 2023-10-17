@@ -56,10 +56,10 @@ module lab2_proc_ProcBaseDpath
   input  logic [1:0]   ex_result_sel_X,
 
   //Imul control signals
-  input  logic         istream_val,
-  input  logic         ostream_rdy,
-  output  logic        istream_rdy,
-  output  logic        ostream_val,
+  input  logic         imul_req_val_D,
+  input  logic         imul_resp_rdy_X,
+  output  logic        imul_req_rdy_D,
+  output  logic        imul_resp_val_X,
 
   input  logic         reg_en_M,
   input  logic         wb_result_sel_M,
@@ -81,8 +81,8 @@ module lab2_proc_ProcBaseDpath
 );
 
   //Imul ports
-  //assign istream_rdy = 1'b0;
-  //assign ostream_val = 1'b0;
+  //assign imul_req_rdy_D = 1'b0;
+  //assign imul_resp_val_X = 1'b0;
 
   localparam c_reset_vector = 32'h200;
   localparam c_reset_inst   = 32'h00000000;
@@ -239,11 +239,11 @@ module lab2_proc_ProcBaseDpath
   (
       .clk(clk),
       .reset(reset),
-      .istream_val(istream_val),
-      .istream_rdy(istream_rdy),
+      .istream_val(imul_req_val_D),
+      .istream_rdy(imul_req_rdy_D),
       .istream_msg(istream_msg),
-      .ostream_val(ostream_val),
-      .ostream_rdy(ostream_rdy),
+      .ostream_val(imul_resp_val_X),
+      .ostream_rdy(imul_resp_rdy_X),
       .ostream_msg(ostream_msg)
   );
 
