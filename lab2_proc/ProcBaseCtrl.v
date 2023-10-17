@@ -572,14 +572,22 @@ module lab2_proc_ProcBaseCtrl
   // branch logic, redirect PC in F if branch is taken
 
   always_comb begin
-    if ( val_X && ( br_type_X == br_bne ) ) begin
-      pc_redirect_X = !br_cond_eq_X;
-      pc_sel_X      = 2'b1; // use branch target
+    casez(inst_X)
+    `TINYRV2_INST_JALR: begin 
+          pc_redirect_X = 1'b1; //always redirect
+          pc_sel_X = 2'd3; //use jal target if valid
+      end
+    default: begin
+      if ( val_X && ( br_type_X == br_bne ) ) begin
+        pc_redirect_X = !br_cond_eq_X;
+        pc_sel_X      = 2'b1; // use branch target
+      end
+      else begin
+        pc_redirect_X = 1'b0;
+        pc_sel_X      = 2'b0; // use pc+4
+      end
     end
-    else begin
-      pc_redirect_X = 1'b0;
-      pc_sel_X      = 2'b0; // use pc+4
-    end
+    endcase
   end
 
   // ostall due to dmem_reqstream not ready.

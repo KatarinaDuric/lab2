@@ -25,10 +25,10 @@ module lab2_proc_ProcDpathImmGen
         imm = { {20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0 };
 
       3'd3: // U-type
-        imm = {inst[31:12], 12'bz};
+        imm = {inst[31:12], 12'b0};
 
       3'd4: // J-type
-        imm = {{12{inst[31]}}, inst[19:12], inst[20], inst[30:25], inst[24:21], 1'bz};
+        imm = {{12{inst[31]}}, inst[19:12], inst[20], inst[30:25], inst[24:21], 1'b0};
 
       default:
         imm = 32'bx;
