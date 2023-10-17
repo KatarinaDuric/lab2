@@ -135,12 +135,20 @@ module lab2_proc_ProcBase
   logic        dmem_reqstream_enq_rdy;
 
   logic [31:0] dmem_reqstream_enq_msg_addr;
+  logic [31:0] dmem_reqstream_enq_msg_data;
 
-  assign dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_READ;
+  always_comb begin
+    case (dmem_reqstream_type_X)
+      2'd1: dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_READ;//Load
+      2'd2: dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_WRITE;//Store
+      default: dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_READ;//No request
+    endcase
+  end
+  //assign dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_READ;
   assign dmem_reqstream_enq_msg.opaque = 8'b0;
   assign dmem_reqstream_enq_msg.addr   = dmem_reqstream_enq_msg_addr;
   assign dmem_reqstream_enq_msg.len    = 2'd0;
-  assign dmem_reqstream_enq_msg.data   = 32'b0;
+  assign dmem_reqstream_enq_msg.data   = dmem_reqstream_enq_msg_data;
 
   vc_Queue#(`VC_QUEUE_BYPASS,$bits(mem_req_4B_t),1) dmem_queue
   (
@@ -191,6 +199,7 @@ module lab2_proc_ProcBase
   logic [1:0]  pc_sel_F;
 
   logic        reg_en_D;
+  logic        op1_sel_D;
   logic [1:0]  op2_sel_D;
   logic [1:0]  csrr_sel_D;
   logic [2:0]  imm_type_D;
@@ -198,6 +207,7 @@ module lab2_proc_ProcBase
   logic        reg_en_X;
   logic [3:0]  alu_fn_X;
   logic [1:0]  ex_result_sel_X;
+  logic [1:0]  dmem_reqstream_type_X;
 
   logic        imul_req_val_D;
   logic        imul_resp_val_X;
@@ -216,6 +226,8 @@ module lab2_proc_ProcBase
 
   logic [31:0] inst_D;
   logic        br_cond_eq_X;
+  logic        br_cond_lt_X;
+  logic        br_cond_ltu_X;
 
   //----------------------------------------------------------------------
   // Control Unit
@@ -267,6 +279,7 @@ module lab2_proc_ProcBase
     // Data Memory Port
 
     .dmem_reqstream_msg_addr  (dmem_reqstream_enq_msg_addr),
+    .dmem_reqstream_msg_data  (dmem_reqstream_enq_msg_data),
     .dmem_respstream_msg_data (dmem_respstream_msg.data),
 
     // mngr communication ports

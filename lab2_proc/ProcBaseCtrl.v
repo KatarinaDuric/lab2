@@ -42,6 +42,7 @@ module lab2_proc_ProcBaseCtrl
   output logic [1:0]  pc_sel_F,
 
   output logic        reg_en_D,
+  output logic        op1_sel_D,
   output logic [1:0]  op2_sel_D,
   output logic [1:0]  csrr_sel_D,
   output logic [2:0]  imm_type_D,
@@ -49,6 +50,7 @@ module lab2_proc_ProcBaseCtrl
   output logic        reg_en_X,
   output logic [3:0]  alu_fn_X,
   output  logic [1:0] ex_result_sel_X,
+  output logic [1:0] dmem_reqstream_type_X,
 
 //Imul signals
   output logic       imul_req_val_D,
@@ -68,6 +70,8 @@ module lab2_proc_ProcBaseCtrl
 
   input  logic [31:0] inst_D,
   input  logic        br_cond_eq_X,
+  input logic         br_cond_lt_X,
+  input logic         br_cond_ltu_X,
 
   // extra ports
 
@@ -226,6 +230,14 @@ module lab2_proc_ProcBaseCtrl
       end
     endcase
   end
+
+//op1 select logic
+always_comb begin
+  casez(inst_D)
+    `TINYRV2_INST_AUIPC: op1_sel_D = 1'b1;
+    default: op1_sel_D = 1'b0;
+  endcase
+end
   // Register enable logic
 
   assign reg_en_D = !stall_D || squash_D;
@@ -274,6 +286,11 @@ module lab2_proc_ProcBaseCtrl
   localparam br_x     = 3'bx; // Don't care
   localparam br_na    = 3'b0; // No branch
   localparam br_bne   = 3'b1; // bne
+  localparam br_beq    = 3'd2; // beq
+  localparam br_blt    = 3'd3; //blt
+  localparam br_bltu   = 3'd4; //bltu
+  localparam br_bge    = 3'd5; //bge
+  localparam br_bgeu   = 3'd6; //bgeu
 
   // Operand 1 Mux Select
 
@@ -292,6 +309,7 @@ module lab2_proc_ProcBaseCtrl
   localparam alu_or   = 4'd4;
   localparam alu_srl  = 4'd5;
   localparam alu_sll  = 4'd6;
+  localparam alu_auipc = 4'd7;
   localparam alu_cp0  = 4'd11;
   localparam alu_cp1  = 4'd12;
 
@@ -400,21 +418,21 @@ module lab2_proc_ProcBaseCtrl
       `TINYRV2_INST_SRLI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_srl, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_SLLI   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_sll, nr, wm_a, y,  n,   n    );
       //`TINYRV2_INST_LUI   :cs( y, br_na,  imm_u, y, bm_imm,  n, alu_lui, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_AUIPC   :cs( y, br_na,  imm_u, y, bm_imm,  n, alu_x, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_AUIPC   :cs( y, br_na,  imm_u, n, bm_imm,  n, alu_auipc, nr, wm_a, y,  n,   n    );
 
       //Memory Instructions
-      //`TINYRV2_INST_SW   :cs( y, br_na,  imm_s, y, bm_imm,  n, alu_add, st, wm_x, n,  n,   n    );
+      `TINYRV2_INST_SW   :cs( y, br_na,  imm_s, y, bm_imm,  y, alu_add, st, wm_x, n,  n,   n    );
 
       //Jump Instructions
       `TINYRV2_INST_JAL   :cs( y, br_na,  imm_j, n, bm_x,  n, alu_x, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_JALR   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_add, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_JALR   :cs( y, br_na,  imm_i, y, bm_imm,  n, alu_add, nr, wm_a, y,  n,   n    );
 
       //Branch Instructions
-      //`TINYRV2_INST_BEQ   :cs( y, br_na,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_BLT   :cs( y, br_na,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_BLTU   :cs( y, br_na,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_BGE   :cs( y, br_na,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
-      //`TINYRV2_INST_BGEU   :cs( y, br_na,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_BEQ   :cs( y, br_beq,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_BLT   :cs( y, br_blt,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_BLTU   :cs( y, br_bltu,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_BGE   :cs( y, br_bge,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_BGEU   :cs( y, br_bgeu,  imm_b, y, bm_rf,  y, alu_x, nr, wm_a, y,  n,   n    );
       default              :cs( n, br_x,  imm_x, n, bm_x,    n, alu_x,   nr, wm_x, n,  n,   n    );
 
     endcase
@@ -542,7 +560,6 @@ module lab2_proc_ProcBaseCtrl
   assign reg_en_X = !stall_X;
 
   logic [31:0] inst_X;
-  logic [1:0]  dmem_reqstream_type_X;
   logic        wb_result_sel_X;
   logic        rf_wen_X;
   logic [4:0]  rf_waddr_X;
@@ -580,6 +597,26 @@ module lab2_proc_ProcBaseCtrl
     default: begin
       if ( val_X && ( br_type_X == br_bne ) ) begin
         pc_redirect_X = !br_cond_eq_X;
+        pc_sel_X      = 2'b1; // use branch target
+      end
+      else if (val_X && ( br_type_X == br_beq )) begin
+        pc_redirect_X = br_cond_eq_X;
+        pc_sel_X      = 2'b1; // use branch target
+      end
+      else if (val_X && ( br_type_X == br_blt )) begin
+        pc_redirect_X = br_cond_lt_X;
+        pc_sel_X      = 2'b1; // use branch target
+      end
+      else if (val_X && ( br_type_X == br_bltu )) begin
+        pc_redirect_X = br_cond_ltu_X;
+        pc_sel_X      = 2'b1; // use branch target
+      end
+      else if (val_X && ( br_type_X == br_bge )) begin
+        pc_redirect_X = !br_cond_lt_X;
+        pc_sel_X      = 2'b1; // use branch target
+      end
+      else if (val_X && ( br_type_X == br_bgeu )) begin
+        pc_redirect_X = !br_cond_ltu_X;
         pc_sel_X      = 2'b1; // use branch target
       end
       else begin
