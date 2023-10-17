@@ -5615,8 +5615,8 @@ VL_INLINE_OPT void Vtop___024root___act_comb__TOP__0(Vtop___024root* vlSelf) {
                                             (vlSelf->top__DOT__DUT__DOT__inst 
                                              >> 0xfU))] 
                                           + (IData)(
-                                                    VL_EXTEND_II(32,12, 
-                                                                 ([&]() {
+                                                    VL_EXTENDS_II(32,12, 
+                                                                  ([&]() {
                                             vlSelf->__Vfunc_top__DOT__DUT__DOT__imm_i__78__inst 
                                                 = vlSelf->top__DOT__DUT__DOT__inst;
                                             vlSelf->__Vfunc_top__DOT__DUT__DOT__imm_i__78__Vfuncout 
