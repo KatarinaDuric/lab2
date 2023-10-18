@@ -1155,7 +1155,7 @@ VL_ATTR_COLD void Vtop___024root___ctor_var_reset_0(Vtop___024root* vlSelf) {
     vlSelf->top__DOT__mem__DOT__vc_trace__DOT__cycles = VL_RAND_RESET_I(32);
     vlSelf->top__DOT__mem__DOT__vc_trace__DOT__level = VL_RAND_RESET_I(4);
     vlSelf->top__DOT__mem__DOT__vc_trace__DOT____Vtogcov__level = VL_RAND_RESET_I(4);
-    vlSelf->__Vfunc_top__DOT__DUT__DOT__dpath__DOT__imul__DOT__multi__DOT__jump__122__b = VL_RAND_RESET_I(7);
+    vlSelf->__Vfunc_top__DOT__DUT__DOT__dpath__DOT__imul__DOT__multi__DOT__jump__128__b = VL_RAND_RESET_I(7);
     vlSelf->__Vdlyvdim0__top__DOT__DUT__DOT__imem_queue__DOT__genblk1__DOT__dpath__DOT__qstore__DOT__rfile__v0 = 0;
     VL_RAND_RESET_W(77, vlSelf->__Vdlyvval__top__DOT__DUT__DOT__imem_queue__DOT__genblk1__DOT__dpath__DOT__qstore__DOT__rfile__v0);
     vlSelf->__Vdlyvset__top__DOT__DUT__DOT__imem_queue__DOT__genblk1__DOT__dpath__DOT__qstore__DOT__rfile__v0 = 0;

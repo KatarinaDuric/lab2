@@ -466,13 +466,7 @@ end
       csrr_sel_D       = 2'h2;
   end
 
-  // bypass logic - case statements to figure out what select logic for bypass muxes is
-  always_comb begin 
-    if ()
-
-  end
-  assign op1_byp_sel_D = 0;
-  assign op2_byp_sel_D = 0;
+  
 
   // mngr2proc_rdy signal for csrr instruction
 
@@ -486,7 +480,8 @@ end
   logic  ostall_waddr_X_rs1_D;
   assign ostall_waddr_X_rs1_D
     = rs1_en_D && val_X && rf_wen_X
-      && ( inst_rs1_D == rf_waddr_X ) && ( rf_waddr_X != 5'd0 );
+      && ( inst_rs1_D == rf_waddr_X ) && ( rf_waddr_X != 5'd0 )
+      && (dmem_reqstream_type_X == ld);
 
   // ostall if write address in M matches rs1 in D
 
@@ -507,7 +502,8 @@ end
   logic  ostall_waddr_X_rs2_D;
   assign ostall_waddr_X_rs2_D
     = rs2_en_D && val_X && rf_wen_X
-      && ( inst_rs2_D == rf_waddr_X ) && ( rf_waddr_X != 5'd0 );
+      && ( inst_rs2_D == rf_waddr_X ) && ( rf_waddr_X != 5'd0 )
+      && (dmem_reqstream_type_X == ld);
 
   // ostall if write address in M matches rs2 in D
 
@@ -534,33 +530,51 @@ end
   assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D || !imul_req_rdy_D);
   //assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D );
 
-  // osquash due to jump instruction in D stage (not implemented yet)
-
-  //assign osquash_D = 1'b0;
 
   // ostall_load_use_X_rs1_D = 
   // val_D && rs1_en_D && val_X && rf_wen_X 
   // && (inst_rs1_D == rf_waddr_X) && (rf_waddr_X != 0) 
-  // && (inst_X == lw);
+  // && (dmem_reqstream_type_X == ld);
 
   // ostall_load_use_X_rs2_D = 
   // val_D && rs2_en_D && val_X && rf_wen_X 
   // && (inst_rs2_D == rf_waddr_X) && (rf_waddr_X != 0)
-  // && (inst_X == lw);
+  // && (dmem_reqstream_type_X == ld);
 
   // ostall_D = 
   // val_D && ( ostall_load_use_X_rs1_D || ostall_load_use_X_rs2_D ) 
+  logic bypass_waddr_X_rs1_D, bypass_waddr_X_rs2_D;
 
-  // bypass_waddr_X_rs1_D = 
-  // val_D && rs1_en_D && val_X && rf_wen_X 
-  // && (inst_rs1_D == rf_waddr_X) && (rf_waddr_X != 0) 
-  // && (inst_X != ld);
+  assign bypass_waddr_X_rs1_D = 
+   val_D && rs1_en_D && val_X && rf_wen_X 
+      && (inst_rs1_D == rf_waddr_X) && (rf_waddr_X != 5'd0) 
+      && (dmem_reqstream_type_X != ld);
 
-  // bypass_waddr_X_rs2_D = 
-  // val_D && rs2_en_D && val_X && rf_wen_X 
-  // && (inst_rs2_D == rf_waddr_X) && (rf_waddr_X != 0)
-  // && (inst_X != ld);
+  assign bypass_waddr_X_rs2_D = 
+   val_D && rs2_en_D && val_X && rf_wen_X 
+      && (inst_rs2_D == rf_waddr_X) && (rf_waddr_X != 5'd0)
+      && (dmem_reqstream_type_X != ld);
 
+
+    // Bypass logic - if statements to figure out what select logic for bypass muxes is
+
+    //Bypass select for rs1
+    always_comb begin
+      if (bypass_waddr_X_rs1_D)
+          op1_byp_sel_D = 2'd1; //bypass from X stage
+      else
+          op1_byp_sel_D = 2'd0;
+    end
+
+    //Bypass select for rs2
+    always_comb begin
+      if (bypass_waddr_X_rs2_D)
+          op2_byp_sel_D = 2'd1; //bypass from X stage
+      else
+          op2_byp_sel_D = 2'd0;
+    end
+
+ // osquash due to jump instruction in D stage
   always_comb begin
     casez(inst_D)
       `TINYRV2_INST_JAL: osquash_D = 1'b1;

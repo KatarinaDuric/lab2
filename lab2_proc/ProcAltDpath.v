@@ -224,6 +224,7 @@ module lab2_proc_ProcAltDpath
    .out  (csrr_data_D)
   );
 
+logic [31:0] op1_byp_mux_out, op2_byp_mux_out;
 vc_Mux4#(32) op1_byp_sel_mux_D
   (
     .in0  (rf_rdata0_D),
