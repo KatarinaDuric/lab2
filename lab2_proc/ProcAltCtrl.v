@@ -49,8 +49,10 @@ module lab2_proc_ProcAltCtrl
 
   output logic        reg_en_X,
   output logic [3:0]  alu_fn_X,
-  output  logic [1:0] ex_result_sel_X,
+  output logic [1:0] ex_result_sel_X,
   output logic [1:0] dmem_reqstream_type_X,
+  output logic [1:0] op1_byp_sel_D,
+  output logic [1:0] op2_byp_sel_D,
 
 //Imul signals
   output logic       imul_req_val_D,
@@ -464,6 +466,14 @@ end
       csrr_sel_D       = 2'h2;
   end
 
+  // bypass logic - case statements to figure out what select logic for bypass muxes is
+  always_comb begin 
+    if ()
+
+  end
+  assign op1_byp_sel_D = 0;
+  assign op2_byp_sel_D = 0;
+
   // mngr2proc_rdy signal for csrr instruction
 
   assign mngr2proc_rdy = val_D && !stall_D && mngr2proc_rdy_D;
@@ -527,6 +537,29 @@ end
   // osquash due to jump instruction in D stage (not implemented yet)
 
   //assign osquash_D = 1'b0;
+
+  // ostall_load_use_X_rs1_D = 
+  // val_D && rs1_en_D && val_X && rf_wen_X 
+  // && (inst_rs1_D == rf_waddr_X) && (rf_waddr_X != 0) 
+  // && (inst_X == lw);
+
+  // ostall_load_use_X_rs2_D = 
+  // val_D && rs2_en_D && val_X && rf_wen_X 
+  // && (inst_rs2_D == rf_waddr_X) && (rf_waddr_X != 0)
+  // && (inst_X == lw);
+
+  // ostall_D = 
+  // val_D && ( ostall_load_use_X_rs1_D || ostall_load_use_X_rs2_D ) 
+
+  // bypass_waddr_X_rs1_D = 
+  // val_D && rs1_en_D && val_X && rf_wen_X 
+  // && (inst_rs1_D == rf_waddr_X) && (rf_waddr_X != 0) 
+  // && (inst_X != ld);
+
+  // bypass_waddr_X_rs2_D = 
+  // val_D && rs2_en_D && val_X && rf_wen_X 
+  // && (inst_rs2_D == rf_waddr_X) && (rf_waddr_X != 0)
+  // && (inst_X != ld);
 
   always_comb begin
     casez(inst_D)
