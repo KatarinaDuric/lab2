@@ -481,7 +481,7 @@ end
   assign ostall_waddr_X_rs1_D
     = rs1_en_D && val_X && rf_wen_X
       && ( inst_rs1_D == rf_waddr_X ) && ( rf_waddr_X != 5'd0 )
-      && ((dmem_reqstream_type_X == ld) || !imul_req_rdy_D);
+      && (dmem_reqstream_type_X == ld);
 
   // ostall if write address in M matches rs1 in D
 
@@ -489,7 +489,7 @@ end
   assign ostall_waddr_M_rs1_D
     = rs1_en_D && val_M && rf_wen_M
       && ( inst_rs1_D == rf_waddr_M ) && ( rf_waddr_M != 5'd0 )
-      && (dmem_reqstream_type_M == ld) && !dmem_respstream_val;;
+      && (dmem_reqstream_type_M == ld) && !dmem_respstream_val;
 
   // ostall if write address in X matches rs2 in D 
   // and there is either a load or an unfinished mul 
@@ -497,7 +497,7 @@ end
   assign ostall_waddr_X_rs2_D
     = rs2_en_D && val_X && rf_wen_X
       && ( inst_rs2_D == rf_waddr_X ) && ( rf_waddr_X != 5'd0 )
-      && ((dmem_reqstream_type_X == ld) || !imul_req_rdy_D);
+      && (dmem_reqstream_type_X == ld);
 
   // ostall if write address in M matches rs2 in D
 
@@ -539,21 +539,21 @@ end
   assign bypass_waddr_X_rs1_D = 
    val_D && rs1_en_D && val_X && rf_wen_X 
       && (inst_rs1_D == rf_waddr_X) && (rf_waddr_X != 5'd0) 
-      && (dmem_reqstream_type_X != ld) && imul_req_rdy_D;
+      && (dmem_reqstream_type_X != ld);
 
   assign bypass_waddr_X_rs2_D = 
    val_D && rs2_en_D && val_X && rf_wen_X 
       && (inst_rs2_D == rf_waddr_X) && (rf_waddr_X != 5'd0)
-      && (dmem_reqstream_type_X != ld) && imul_req_rdy_D;
+      && (dmem_reqstream_type_X != ld);
 
   //Bypass if no writeback from memory or the load data is valid
   assign bypass_waddr_M_rs1_D = rs1_en_D && val_M && rf_wen_M
       && ( inst_rs1_D == rf_waddr_M ) && ( rf_waddr_M != 5'd0 )
-      && ((wb_result_sel_M != wm_m) || ((dmem_reqstream_type_M == ld) && dmem_respstream_val)); 
+      && ((wb_result_sel_M != wm_m) || dmem_respstream_val); 
 
   assign bypass_waddr_M_rs2_D = rs2_en_D && val_M && rf_wen_M
       && ( inst_rs2_D == rf_waddr_M ) && ( rf_waddr_M != 5'd0 )
-      && ((wb_result_sel_M != wm_m) || ((dmem_reqstream_type_M == ld) && dmem_respstream_val));
+      && ((wb_result_sel_M != wm_m) || dmem_respstream_val);
 
   assign bypass_waddr_W_rs1_D = rs1_en_D && val_W && rf_wen_W
       && ( inst_rs1_D == rf_waddr_W ) && ( rf_waddr_W != 5'd0 );
@@ -693,7 +693,7 @@ end
   // ostall due to dmem_reqstream not ready.
   always_comb begin
     casez(inst_X)
-      `TINYRV2_INST_MUL: ostall_X =  !imul_resp_val_X;
+      `TINYRV2_INST_MUL: ostall_X =  val_X && !imul_req_rdy_D;
        default: ostall_X = val_X && ( dmem_reqstream_type_X != nr ) && !dmem_reqstream_rdy;
     endcase
   end

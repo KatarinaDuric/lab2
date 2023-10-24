@@ -349,7 +349,7 @@ vc_Mux2#(32) op1_sel_mux_D
     .clk   (clk),
     .reset (reset),
     .en    (reg_en_X),
-    .d     (rf_rdata1_D),
+    .d     (op2_byp_mux_out),
     .q     (dmem_reqstream_msg_data)
   );
 

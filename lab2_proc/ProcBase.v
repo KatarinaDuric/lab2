@@ -141,7 +141,7 @@ module lab2_proc_ProcBase
     case (dmem_reqstream_type_X)
       2'd1: dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_READ;//Load
       2'd2: dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_WRITE;//Store
-      default: dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_READ;//No request
+      default: dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_X; //No request
     endcase
   end
   //assign dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_READ;

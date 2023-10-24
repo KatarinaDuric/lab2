@@ -133,7 +133,6 @@ module lab2_proc_ProcAlt
   logic        dmem_reqstream_enq_val;
   logic        dmem_reqstream_enq_rdy;
 
-  logic [2:0 ] dmem_reqstream_enq_msg_type;
   logic [31:0] dmem_reqstream_enq_msg_addr;
   logic [31:0] dmem_reqstream_enq_msg_data;
 
@@ -141,7 +140,7 @@ module lab2_proc_ProcAlt
     case (dmem_reqstream_type_X)
       2'd1: dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_READ;//Load
       2'd2: dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_WRITE;//Store
-      default: dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_READ;//No request
+      default: dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_X;//No request
     endcase
   end
   //assign dmem_reqstream_enq_msg.type_  = `VC_MEM_REQ_MSG_TYPE_READ;
