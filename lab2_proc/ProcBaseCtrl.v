@@ -206,7 +206,7 @@ module lab2_proc_ProcBaseCtrl
   // resetting.
 
   assign imem_reqstream_val  = ( !stall_F || squash_F ) && !reset;
-  assign imem_respstream_rdy = !stall_F || squash_F;
+  assign imem_respstream_rdy = !(val_F && ( ostall_D || ostall_X || ostall_M || ostall_W )) || squash_F;
 
   // Valid signal for the next stage (stage D)
 
@@ -221,7 +221,7 @@ module lab2_proc_ProcBaseCtrl
   always_comb begin
     casez(inst_D)
       `TINYRV2_INST_JAL: begin 
-          pc_redirect_D = 1'b1; //always redirect
+          pc_redirect_D = val_D; //always redirect
           pc_sel_D = 2'd2; //use jal target if valid
       end
       default: begin

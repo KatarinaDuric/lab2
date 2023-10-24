@@ -208,7 +208,7 @@ module lab2_proc_ProcAltCtrl
   // resetting.
 
   assign imem_reqstream_val  = ( !stall_F || squash_F ) && !reset;
-  assign imem_respstream_rdy = !stall_F || squash_F;
+  assign imem_respstream_rdy = !(val_F && ( ostall_D || ostall_X || ostall_M || ostall_W )) || squash_F;
 
   // Valid signal for the next stage (stage D)
 
