@@ -71,6 +71,18 @@
    # but sw only takes lower 12-bits
    sw x3,  label_f(x1)
 
+#Test 6: Result of all Fs
+   csrr x1, mngr2proc < -1
+   csrr x2, mngr2proc < 1
+   add x3, x1, x2
+   xor x1, x1, x1
+   #Loading Data section
+   lui x1, 2
+   # label_a is 0x000, it's true location is 0x0002000 
+   # but sw only takes lower 12-bits
+   sw x3,  label_g(x1)
+
+
    #data section
    .data
    label_a:
@@ -85,5 +97,6 @@
    .word 5000
    label_f:
    .word 5000
-
+   label_g:
+   .word 5000
 

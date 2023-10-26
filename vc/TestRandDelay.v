@@ -144,7 +144,6 @@ module vc_TestRandDelay
         rand_delay_en   = in_val && !zero_cycle_delay;
         rand_delay_next = (rand_num > 0) ? rand_num - 1 : rand_num;
         in_rdy          = out_rdy && (rand_num == 0);
-        out_val         = in_val  && (rand_num == 0);
       end
 
       c_state_delay:
@@ -152,7 +151,6 @@ module vc_TestRandDelay
         rand_delay_en   = (rand_delay > 0);
         rand_delay_next = rand_delay - 1;
         in_rdy          = out_rdy && (rand_delay == 0);
-        out_val         = in_val  && (rand_delay == 0);
       end
 
       default:
@@ -160,13 +158,31 @@ module vc_TestRandDelay
         rand_delay_en   = 1'bx;
         rand_delay_next = 32'bx;
         in_rdy          = 1'bx;
-        out_val         = 1'bx;
       end
 
     endcase
-
   end
 
+  always_comb begin
+      case ( state )
+
+      c_state_idle:
+      begin
+        out_val         = in_val  && (rand_num == 0);
+      end
+
+      c_state_delay:
+      begin
+        out_val         = in_val  && (rand_delay == 0);
+      end
+
+      default:
+      begin
+        out_val         = 1'bx;
+      end
+    endcase
+
+  end
   //----------------------------------------------------------------------
   // Other combinational logic
   //----------------------------------------------------------------------

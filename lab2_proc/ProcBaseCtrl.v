@@ -466,10 +466,13 @@ end
 
   // mngr2proc_rdy signal for csrr instruction
 
-  assign mngr2proc_rdy = val_D && !stall_D && mngr2proc_rdy_D;
+  assign mngr2proc_rdy = val_D && !stall_D && !squash_D && mngr2proc_rdy_D;
 
   logic  ostall_mngr2proc_D;
   assign ostall_mngr2proc_D = val_D && mngr2proc_rdy_D && !mngr2proc_val;
+  // always_ff @(posedge clk) begin
+  //   ostall_mngr2proc_D <= val_D && mngr2proc_rdy_D && !mngr2proc_val;
+  // end 
 
   // ostall if write address in X matches rs1 in D
 
@@ -713,13 +716,18 @@ end
 
   assign ostall_M = val_M && ( dmem_reqstream_type_M != nr ) && !dmem_respstream_val;
 
+
   // stall M
 
   assign stall_M = val_M && ( ostall_M || ostall_W );
 
   // Set dmem_respstream_rdy if valid and not stalling and this is a lw/sw
+ 
+  assign dmem_respstream_rdy = val_M && !ostall_W  && ( dmem_reqstream_type_M != nr );
 
-  assign dmem_respstream_rdy = val_M && !stall_M && ( dmem_reqstream_type_M != nr );
+  // always_ff @(posedge clk) begin
+  //   dmem_respstream_rdy <= val_M && !stall_M && ( dmem_reqstream_type_M != nr );
+  // end
 
   // Valid signal for the next stage
 
