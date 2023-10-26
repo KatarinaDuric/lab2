@@ -74,17 +74,29 @@ module lab2_proc_DropUnit
       // we combinationally take care of dropping if the packet is already
       // available
       ostream_val = istream_val && !drop;
-      istream_rdy  = ostream_rdy;
 
     end else begin
 
       // we just drop the packet
       ostream_val = 1'b0;
-      istream_rdy  = 1'b1;
 
     end
   end
 
+always_comb begin
+    if ( state == c_state_pass ) begin
+
+      // we combinationally take care of dropping if the packet is already
+      // available
+      istream_rdy  = ostream_rdy;
+
+    end else begin
+
+      // we just drop the packet
+      istream_rdy  = 1'b1;
+
+    end
+  end
   // state transitions
 
   always_ff @( posedge clk ) begin

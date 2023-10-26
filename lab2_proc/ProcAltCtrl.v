@@ -406,9 +406,9 @@ end
       `TINYRV2_INST_AND   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_and, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_OR   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_or, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_XOR   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_xor, nr, wm_a, y,  n,   n    );
-      `TINYRV2_INST_SLT   :cs( y, br_na,  imm_x, y, bm_rf,  n, alu_slt, nr, wm_a, y,  n,   n    );
-      `TINYRV2_INST_SLTU   :cs( y, br_na,  imm_x, y, bm_rf,  n, alu_sltu, nr, wm_a, y,  n,   n    );
-      `TINYRV2_INST_SRA   :cs( y, br_na,  imm_x, y, bm_rf,  n, alu_sra, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SLT   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_slt, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SLTU   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sltu, nr, wm_a, y,  n,   n    );
+      `TINYRV2_INST_SRA   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sra, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_SRL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_srl, nr, wm_a, y,  n,   n    );
       `TINYRV2_INST_SLL   :cs( y, br_na,  imm_x, y, bm_rf,  y, alu_sll, nr, wm_a, y,  n,   n    );
   
@@ -516,6 +516,7 @@ end
 
   // Final ostall signal
   assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D || !imul_req_rdy_D);
+  //assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D);
   //assign ostall_D = val_D && ( ostall_mngr2proc_D || ostall_hazard_D );
 
 
@@ -693,7 +694,7 @@ end
   // ostall due to dmem_reqstream not ready.
   always_comb begin
     casez(inst_X)
-      `TINYRV2_INST_MUL: ostall_X =  val_X && !imul_req_rdy_D;
+      `TINYRV2_INST_MUL: ostall_X =  val_X && !imul_resp_val_X;
        default: ostall_X = val_X && ( dmem_reqstream_type_X != nr ) && !dmem_reqstream_rdy;
     endcase
   end

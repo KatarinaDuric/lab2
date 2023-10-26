@@ -1,22 +1,23 @@
-csrr x1, mngr2proc < 0x00002000
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-lw   x2, 0(x1)
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-csrw proc2mngr, x2 > 0x01020304
+xor x1, x1, x1
+xori x1, x1, 4
+add x1, x1, x1
+lw x1, label_a(x1)
+add x1, x1, x1
+lw x1, label_a(x1)
+add x1, x1, x1
+lw x1, label_a(x1)
+add x1, x1, x1
+lw x1, label_a(x1)
+add x1, x1, x1
+lw x1, label_a(x1)
+add x1, x1, x1
+lw x1, label_a(x1)
+add x1, x1, x1
+lw x1, label_a(x1)
+add x1, x1, x1
+lw x1, label_a(x1)
+
 
 .data
-.word 0x01020304
+label_a:
+.word 5000

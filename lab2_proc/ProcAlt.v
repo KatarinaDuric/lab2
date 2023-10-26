@@ -181,7 +181,7 @@ module lab2_proc_ProcAlt
 
     .enq_msg (proc2mngr_enq_msg),
     .enq_val (proc2mngr_enq_val),
-    .enq_rdy (proc2mngr_enq_rdy),
+    .enq_rdy(proc2mngr_enq_rdy),
 
     .deq_msg (proc2mngr_msg),
     .deq_val (proc2mngr_val),

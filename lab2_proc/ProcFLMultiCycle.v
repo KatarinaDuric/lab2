@@ -11,7 +11,7 @@
 
 `include "tinyrv2_encoding.v"
 
-
+/* verilator lint_off UNOPTFLAT */
 module lab2_proc_ProcFLMultiCycle
 #(
   parameter p_num_cores = 1
@@ -534,6 +534,6 @@ module lab2_proc_ProcFLMultiCycle
   `endif
 
 endmodule
-
+/* verilator lint_on UNOPTFLAT */
 `endif /* LAB2_PROC_PROC_BASE_V */
 
