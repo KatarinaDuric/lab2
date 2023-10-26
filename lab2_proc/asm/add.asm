@@ -5,7 +5,7 @@
 # set the address where you want this
 # code segment
 
-#provided test
+#Test 0: 
    xor x1, x1, x1
    xori x1, x1, 0x0200
    add x3, x1, x1
@@ -16,7 +16,7 @@
    # but sw only takes lower 12-bits
    sw x3,  label_a(x1)
 
-#Test 1: 
+#Test 1: Neg added to positive
    csrr x1, mngr2proc < -7
    csrr x2, mngr2proc < 2
    add x3, x1, x2
@@ -26,7 +26,7 @@
    # label_a is 0x000, it's true location is 0x0002000 
    # but sw only takes lower 12-bits
    sw x3,  label_b(x1)
-#Test 2:
+#Test 2: Larg
    csrr x1, mngr2proc < 2147483647
    csrr x2, mngr2proc < 268435455
    add x3, x1, x2

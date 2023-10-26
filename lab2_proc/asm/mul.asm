@@ -8,7 +8,7 @@
 #Test 0: Multiply by 0
    csrr x1, mngr2proc < 1
    csrr x2, mngr2proc < 0
-   add x3, x1, x2
+   mul x3, x1, x2
    xor x1, x1, x1
    #Loading Data section
    lui x1, 2
@@ -19,7 +19,7 @@
 #Test 1: Multiply by -1
    csrr x1, mngr2proc < 7
    csrr x2, mngr2proc < -1
-   add x3, x1, x2
+   mul x3, x1, x2
    xor x1, x1, x1
    #Loading Data section
    lui x1, 2
@@ -30,7 +30,7 @@
 #Test 2: Neg times neg
    csrr x1, mngr2proc < -2
    csrr x2, mngr2proc < -2
-   add x3, x1, x2
+   mul x3, x1, x2
    xor x1, x1, x1
    #Loading Data section
    lui x1, 2
@@ -41,7 +41,7 @@
 #Test 3: Neg times pos
    csrr x1, mngr2proc < 3
    csrr x2, mngr2proc < -2
-   add x3, x1, x2
+   mul x3, x1, x2
    xor x1, x1, x1
    #Loading Data section
    lui x1, 2
@@ -52,7 +52,7 @@
 #Test 4: Overflow pos times pos
    csrr x1, mngr2proc < 2147483647
    csrr x2, mngr2proc < 2 
-   add x3, x1, x2
+   mul x3, x1, x2
    xor x1, x1, x1
    #Loading Data section
    lui x1, 2
@@ -63,7 +63,7 @@
 #Test 5: Overflow neg times neg
    csrr x1, mngr2proc < 2147483648
    csrr x2, mngr2proc < 2 
-   add x3, x1, x2
+   mul x3, x1, x2
    xor x1, x1, x1
    #Loading Data section
    lui x1, 2
@@ -74,7 +74,7 @@
 #Test 6: Result of all Fs
    csrr x1, mngr2proc < -1
    csrr x2, mngr2proc < 1
-   add x3, x1, x2
+   mul x3, x1, x2
    xor x1, x1, x1
    #Loading Data section
    lui x1, 2

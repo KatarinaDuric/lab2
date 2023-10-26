@@ -5,10 +5,9 @@
 # set the address where you want this
 # code segment
 
-#provided test
-   xor x1, x1, x1
-   xori x1, x1, 0x0200
-   addi x3, x1, 0x200
+#Test 0: And with 0
+   csrr x1, mngr2proc < 65
+   andi x3, x1, 0
    xor x1, x1, x1
    #Loading Data section
    lui x1, 2
@@ -16,51 +15,24 @@
    # but sw only takes lower 12-bits
    sw x3,  label_a(x1)
 
-#Test 1: 
-   csrr x1, mngr2proc < -7
-   addi x3, x1, 2
+#Test 1: And with all 1s
+   csrr x1, mngr2proc < 45
+   andi x3, x1, -1
    xor x1, x1, x1
    #Loading Data section
    lui x1, 2
    # label_a is 0x000, it's true location is 0x0002000 
    # but sw only takes lower 12-bits
    sw x3,  label_b(x1)
-#Test 2:
-   csrr x1, mngr2proc < 2147483647
-   addi x3, x1, 1
+#Test 2: And all 1s with anything
+   csrr x1, mngr2proc < 4294967295
+   andi x3, x1, 15
    xor x1, x1, x1
    #Loading Data section
    lui x1, 2
    # label_a is 0x000, it's true location is 0x0002000 
    # but sw only takes lower 12-bits
    sw x3,  label_c(x1)
-#Test 3:
-   csrr x1, mngr2proc < 2147483648
-   addi x3, x1, 0xFFF
-   xor x1, x1, x1
-   #Loading Data section
-   lui x1, 2
-   # label_a is 0x000, it's true location is 0x0002000 
-   # but sw only takes lower 12-bits
-   sw x3,  label_d(x1)
-#Test 4:
-   csrr x1, mngr2proc < 214
-   addi x3, x1, 0
-   xor x1, x1, x1
-   #Loading Data section
-   lui x1, 2
-   # label_a is 0x000, it's true location is 0x0002000 
-   # but sw only takes lower 12-bits
-   sw x3,  label_e(x1)
-#Test 5:
-   csrr x1, mngr2proc < 0
-   addi x3, x1, 0x001
-   xor x1, x1, x1
-   #Loading Data section
-   lui x1, 2
-   # label_a is 0x000, it's true location is 0x0002000 
-   # but sw only takes lower 12-bits
-   sw x3,  label_f(x1)
 
    #data section
    .data
@@ -70,11 +42,5 @@
    .word 5000
    label_c:
    .word 5000
-   label_d:
-   .word 5000
-   label_e:
-   .word 5000
-   label_f:
-   .word 5000
-
+   
 

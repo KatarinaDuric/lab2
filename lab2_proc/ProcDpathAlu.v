@@ -35,7 +35,7 @@ module lab2_proc_ProcDpathAlu
       4'd11   : out = in0;                                      // CP OP0
       4'd12   : out = in1;                                      // CP OP1
 
-      default : out = 32'b0;
+      default : $stop; //out = 32'b0;
     endcase
 
   end
